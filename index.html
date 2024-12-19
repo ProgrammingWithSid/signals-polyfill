@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signals Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .value-display {
+            margin: 20px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 30px;
+            text-align: center;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        .log-container {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h2>Signals Test</h2>
+    
+    <div>
+        <h3>First Signal</h3>
+        <button id="decValue">-</button>
+        <span id="valueDisplay" class="value-display">0</span>
+        <button id="incValue">+</button>
+    </div>
+
+    <div>
+        <h3>Second Signal</h3>
+        <button id="decBValue">-</button>
+        <span id="bValueDisplay" class="value-display">2</span>
+        <button id="incBValue">+</button>
+    </div>
+
+    <div>
+        <h3>Computed Sum</h3>
+        <div id="sumDisplay" class="value-display">2</div>
+    </div>
+
+    <div>
+        <h3>Effect Log</h3>
+        <div id="logContainer" class="log-container"></div>
+    </div>
+
+    <script type="module">
+        import { computed } from "./src/computed.js";
+        import { watchEffect } from "./src/effects.js";
+        import { createSignal } from "./src/signals.js";
+
+        // Create signals
+        const [getValue, setValue] = createSignal(0);
+        const [getBValue, setBValue] = createSignal(2);
+
+        // Create computed value
+        const sum = computed(() => getValue() + getBValue());
+
+        // Update displays
+        function updateDisplays() {
+            document.getElementById('valueDisplay').textContent = getValue();
+            document.getElementById('bValueDisplay').textContent = getBValue();
+            document.getElementById('sumDisplay').textContent = sum();
+        }
+
+        // Log effect
+        function log(message) {
+            const logContainer = document.getElementById('logContainer');
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            logContainer.insertBefore(logEntry, logContainer.firstChild);
+        }
+
+        // Watch for changes
+        watchEffect(() => {
+            const sumValue = sum();
+            log(`Sum changed to: ${sumValue}`);
+        });
+
+        // Add event listeners
+        document.getElementById('incValue').addEventListener('click', () => {
+            setValue(getValue() + 1);
+            updateDisplays();
+        });
+
+        document.getElementById('decValue').addEventListener('click', () => {
+            setValue(getValue() - 1);
+            updateDisplays();
+        });
+
+        document.getElementById('incBValue').addEventListener('click', () => {
+            setBValue(getBValue() + 1);
+            updateDisplays();
+        });
+
+        document.getElementById('decBValue').addEventListener('click', () => {
+            setBValue(getBValue() - 1);
+            updateDisplays();
+        });
+
+        // Initial display update
+        updateDisplays();
+    </script>
+</body>
+</html>
